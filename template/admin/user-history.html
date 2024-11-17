@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Borrower Transaction History</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 90%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+        h1 {
+            font-size: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .no-data {
+            text-align: center;
+            color: #6c757d;
+            font-size: 16px;
+        }
+        .btn {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Borrower Transaction History</h1>
+    <!-- Table to display borrower transaction details -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Book</th>
+                <th>Author</th>
+                <th>Borrowed Date</th>
+                <th>Status</th>
+                <th>Overdue Fine</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+    <!-- Button to go back or refresh -->
+    <button class="btn btn-primary" onclick="window.history.back()">Go Back</button>
+</div>
+    <script>
+      // Correcting the localStorage key
+      const borrowerId = localStorage.getItem('userId');
+      
+      if (borrowerId) {
+        fetch(`/admin-borrower-details/${borrowerId}`)
+          .then(function (response) {
+            if (response.ok) {
+              return response.json();
+            }
+            throw Error("Failed to fetch data.");
+          })
+          .then(function (data) {
+            if (data.length === 0) {
+              Swal.fire('No transactions found', '', 'info');
+              return;
+            }
+  
+            let rows = '';
+            data.forEach(function (item) {
+              rows += `
+                <tr>
+                  <td>${item.book.title}</td>
+                  <td>${item.book.author}</td>
+                  <td>${item.date}</td>
+                  <td>${item.status}</td>
+                  <td>${item.fine} Baht</td>
+                </tr>
+              `;
+            });
+  
+            // Update the table body with the rows
+            document.getElementById('tbody').innerHTML = rows;
+          })
+          .catch(function (error) {
+            Swal.fire('Error', 'Something went wrong. Please try again later.', 'error');
+            console.error(error);
+          });
+      } else {
+        Swal.fire('Error', 'No borrower ID found. Please log in.', 'error');
+      }
+    </script>
+  </body>
+</html>
